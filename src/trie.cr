@@ -172,7 +172,7 @@ class Trie
     end
 
     if position >= word.size
-      # just collect the rest without any adjustments etc
+      # just collect the rest without any adjustments
 
       if match_count > 0
         # on very large sets we need to limit response size

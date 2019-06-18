@@ -33,37 +33,43 @@ describe Trie do
       res = trie.find("yste")
       res.size.should eq(6)
 
+      puts res.inspect
+
       words = res.map{|x|x.first}
       ["system", "stack", "server", "stdioh", "xss", "starcraft"].each do |w|
         words.includes?(w).should be_true
       end
     end
 
-    it "should find buffer" do
+    it "will locate similar items" do
       trie = Trie.new
       words.each do |word|
         trie.add(word.downcase)
       end
 
+      #NOTE min_relevance does not work on long input strs
       res = trie.find("uuufer")
       res.size.should eq(1)
       res.map(&.first).includes?("buffer").should be_true
 
+      res = trie.find("buuferr")
+      puts res.inspect
+      res.size.should eq(2)
+      items = res.map(&.first)
+      items.includes?("buffer").should be_true
+      items.includes?("brute").should be_true
+      
+      
+      #TODO: how to make this a non-match
+      res = trie.find("buuferrrerebuffererebufbufuuuufer")
+      puts res.inspect
+      res.size.should eq(2)
+      items = res.map(&.first)
+      items.includes?("buffer").should be_true
+      items.includes?("brute").should be_true
     end
 
-    it "should find buffer 2" do
-      trie = Trie.new
-      trie.add("buffer")
-
-      res = trie.find("uufer")
-      puts res.inspect
-
-      words = res.map(&.first)
-      words.size.should eq(1)
-      ["buffer"].each do |w|
-        words.includes?(w).should be_true
-      end
-
+    it "accepts spelling errors" do
       trie = Trie.new
       trie.add("default")
       trie.add("devnull")
@@ -76,7 +82,7 @@ describe Trie do
       end
     end
 
-    it "should support several words in same branch" do
+    it "supports several words in same node branch" do
       trie = Trie.new
       words = %w{sol soldat solid}
       words.each do |w|
@@ -87,7 +93,7 @@ describe Trie do
       res.size.should eq(3)
     end
 
-    it "should find similar items beginning with" do
+    it "finds similar items beginning with" do
       trie = Trie.new
       words = %w{sol soldat solid}
       words.each do |w|
@@ -104,7 +110,7 @@ describe Trie do
       res.size.should eq(0)
     end
 
-    it "should accept spelling errors" do
+    it "accepts spelling errors" do
       trie = Trie.new
       words = %w{sol soldat solid}
       words.each do |w|
@@ -123,7 +129,7 @@ describe Trie do
       words.includes?("solid").should be_true
     end
 
-    it "should find short words too" do
+    it "finds short words" do
       trie = Trie.new
       words = %w{ab nu se}
       words.each do |w|
@@ -137,7 +143,7 @@ describe Trie do
       res.map(&.first).first.should eq("ab")
     end
     
-    it "should find short words too 2" do
+    it "finds more short words" do
       trie = Trie.new(rwd_max_nomatch_count: 2)
       words = %w{ab ad ac}
       words.each do |w|
@@ -155,7 +161,7 @@ describe Trie do
       res.map(&.first).first.should eq("ab")
     end
 
-    it "should skip over nonmatching char" do
+    it "skips over nonmatching char" do
       #todo: map likely replacement chars?
 
       trie = Trie.new(
@@ -169,7 +175,7 @@ describe Trie do
       puts res
     end
 
-    it "should handle large data sets" do
+    it "handles large data sets" do
       trie = Trie.new(
         fwd_max_nomatch_count: 1,
         rwd_max_nomatch_count: 1,
