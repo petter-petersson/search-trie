@@ -1,6 +1,9 @@
 # trie
 
-TODO: Write a description here
+Work in progress
+
+(Current) test file author:
+https://github.com/martinlindhe/wordlist_swedish
 
 ## Installation
 
