@@ -1,2 +1,6 @@
 require "spec"
-require "../src/trie"
+require "../src/spell.cr"
+require "../src/trie.cr"
+require "../src/http/app_context.cr"
+require "../src/http/routing_handler.cr"
+require "../src/http/search_action.cr"

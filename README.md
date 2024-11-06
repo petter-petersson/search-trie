@@ -5,6 +5,9 @@ Work in progress
 (Current) test file author:
 https://github.com/martinlindhe/wordlist_swedish
 
+`crystal spec <specfile>`
+`crystal build --release src/server.cr`
+
 ## Installation
 
 1. Add the dependency to your `shard.yml`:
@@ -12,7 +15,7 @@ https://github.com/martinlindhe/wordlist_swedish
    ```yaml
    dependencies:
      trie:
-       github: your-github-user/trie
+       github: petter-petersson/trie
    ```
 
 2. Run `shards install`
@@ -39,4 +42,4 @@ TODO: Write development instructions here
 
 ## Contributors
 
-- [Petter Peterson](https://github.com/your-github-user) - creator and maintainer
+- [Petter Peterson](https://github.com/petter-petersson) - creator and maintainer

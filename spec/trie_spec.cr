@@ -10,9 +10,8 @@ def words
 end
 
 describe Trie do
-
   context "searching" do
-    it "should load words into a structure and list all"  do
+    it "should load words into a structure and list all" do
       trie = Trie.new
       words.each do |word|
         trie.add(word.downcase)
@@ -20,66 +19,6 @@ describe Trie do
       res = trie.all
       res.size.should eq(114)
       trie.count.should eq(114)
-    end
-
-    it "should find similar" do
-      trie = Trie.new
-      words.each do |word|
-        trie.add(word.downcase)
-      end
-      res = trie.find("sys")
-      res.size.should eq(2)
-      puts res.inspect
-      res = trie.find("yste")
-      res.size.should eq(6)
-
-      puts res.inspect
-
-      words = res.map{|x|x.first}
-      ["system", "stack", "server", "stdioh", "xss", "starcraft"].each do |w|
-        words.includes?(w).should be_true
-      end
-    end
-
-    it "will locate similar items" do
-      trie = Trie.new
-      words.each do |word|
-        trie.add(word.downcase)
-      end
-
-      #NOTE min_relevance does not work on long input strs
-      res = trie.find("uuufer")
-      res.size.should eq(1)
-      res.map(&.first).includes?("buffer").should be_true
-
-      res = trie.find("buuferr")
-      puts res.inspect
-      res.size.should eq(2)
-      items = res.map(&.first)
-      items.includes?("buffer").should be_true
-      items.includes?("brute").should be_true
-      
-      
-      #TODO: how to make this a non-match
-      res = trie.find("buuferrrerebuffererebufbufuuuufer")
-      puts res.inspect
-      res.size.should eq(2)
-      items = res.map(&.first)
-      items.includes?("buffer").should be_true
-      items.includes?("brute").should be_true
-    end
-
-    it "accepts spelling errors" do
-      trie = Trie.new
-      trie.add("default")
-      trie.add("devnull")
-
-      res = trie.find("dewnul")
-      words = res.map(&.first)
-      words.size.should eq(1)
-      ["devnull"].each do |w|
-        words.includes?(w).should be_true
-      end
     end
 
     it "supports several words in same node branch" do
@@ -110,113 +49,29 @@ describe Trie do
       res.size.should eq(0)
     end
 
-    it "accepts spelling errors" do
-      trie = Trie.new
-      words = %w{sol soldat solid}
-      words.each do |w|
-        trie.add(w.downcase)
-      end
-
-      res = trie.find("sldatt")
-      res.size.should eq(3)
-      res.map(&.first).first.should eq("soldat")
-
-      res = trie.find("soold")
-      res.size.should eq(3)
-      words = res.map(&.first)
-      words.includes?("soldat").should be_true
-      words.includes?("sol").should be_true
-      words.includes?("solid").should be_true
-    end
-
-    it "finds short words" do
-      trie = Trie.new
-      words = %w{ab nu se}
-      words.each do |w|
-        trie.add(w.downcase)
-      end
-      words.size.should eq(3)
-      trie.count.should eq(3)
-
-      res = trie.find("aaab")
-      res.size.should eq(1)
-      res.map(&.first).first.should eq("ab")
-    end
-    
-    it "finds more short words" do
-      trie = Trie.new(rwd_max_nomatch_count: 2)
-      words = %w{ab ad ac}
-      words.each do |w|
-        trie.add(w.downcase)
-      end
-      trie.count.should eq(3)
-
-      trie = Trie.new(rwd_max_nomatch_count: 2)
-      words = %w{ab ad ac}
-      words.each do |w|
-        trie.add(w.downcase)
-      end
-      res = trie.find("aaab")
-      puts res.inspect
-      res.map(&.first).first.should eq("ab")
-    end
-
-    it "skips over nonmatching char" do
-      #todo: map likely replacement chars?
-
-      trie = Trie.new(
-        rwd_max_nomatch_count: 2,
-        fwd_max_nomatch_count: 1,
-      )
-      trie.add("bromma")
-      res = trie.find("bråmma")
-      puts res
-      res = trie.find("brååmma")
-      puts res
-    end
-
     it "handles large data sets" do
-      trie = Trie.new(
-        fwd_max_nomatch_count: 1,
-        rwd_max_nomatch_count: 1,
-        min_relevance: 0.8, #high value since we have a lot of items
-      )
-      t = Time.now
-      File.each_line(File.join(File.dirname(__FILE__), "fixtures", "swe_wordlist.txt")) do |line|
-        trie.add(line)
+      trie = Trie.new
+
+      w_file = File.join(File.dirname(__FILE__), "fixtures", "swe_wordlist.txt")
+      t = Time.measure do
+        File.each_line(w_file) do |line|
+          trie.add(line.downcase.gsub(/[^a-zåäö]+/, ""))
+        end
       end
-      puts Time.now - t
+      puts t
       puts "--"
 
-      t = Time.now
-      res = trie.beginning_with("tram")
-      puts res.inspect
-      puts Time.now - t
-      puts "--"
+      t = Time.measure do
+        res = trie.beginning_with("tram")
+        res.size.should eq(60)
+      end
+      puts t
 
-      t = Time.now
-      res = trie.find("tramsig")
-      puts res.size
-      puts res[0..10].inspect
-      puts Time.now - t
-
-      t = Time.now
-      res = trie.find("a")
-      puts res.size
-      puts res[0..10].inspect
-      puts Time.now - t
-      
-      t = Time.now
-      res = trie.find("mjäcklare")
-      puts res.size
-      puts res[0..10].inspect
-      puts Time.now - t
-      
-      t = Time.now
-      res = trie.find("qwe")
-      puts res.size
-      puts res[0..10].inspect
-      puts Time.now - t
+      t = Time.measure do
+        res = trie.beginning_with("artilleri")
+        puts res
+      end
+      puts t
     end
   end
 end
