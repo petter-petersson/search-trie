@@ -22,11 +22,11 @@ https://github.com/martinlindhe/wordlist_swedish
 
 ## Usage
 
-```crystal
-require "trie"
-```
+build and run the test server:
+`crystal build --release src/server.cr && ./server`
 
-TODO: Write usage instructions here
+run the test client:
+`ruby client.rb`
 
 ## Development
 
